@@ -1,0 +1,14 @@
+CREATE DATABASE employee_db;
+USE employee_db;
+
+CREATE TABLE Employee (
+    EmpID INT PRIMARY KEY,
+    Name VARCHAR(100),
+    Salary DECIMAL(10, 2)
+);
+
+INSERT INTO Employee (EmpID, Name, Salary)
+VALUES 
+(101, 'John Doe', 55000),
+(102, 'Alice Smith', 62000),
+(103, 'Bob Johnson', 48000);
