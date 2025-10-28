@@ -1,0 +1,180 @@
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/LoginServlet")
+public class LoginServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    
+    // Hardcoded credentials for demonstration
+    // In production, these should be stored securely in a database
+    private static final String VALID_USERNAME = "admin";
+    private static final String VALID_PASSWORD = "admin123";
+    
+    /**
+     * Handles POST requests from the login form
+     */
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        // Set response content type
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+        
+        // Retrieve form parameters
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        
+        // Validate input
+        if (username == null || username.trim().isEmpty() || 
+            password == null || password.trim().isEmpty()) {
+            displayErrorPage(out, "Username and password are required!");
+            return;
+        }
+        
+        // Authenticate user
+        if (authenticateUser(username, password)) {
+            displayWelcomePage(out, username);
+        } else {
+            displayErrorPage(out, "Invalid username or password!");
+        }
+        
+        out.close();
+    }
+    
+    /**
+     * Handles GET requests (redirects to POST)
+     */
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+        
+        out.println("<html><body>");
+        out.println("<h3>Please use the login form to access this page.</h3>");
+        out.println("<a href='login.html'>Go to Login Page</a>");
+        out.println("</body></html>");
+        out.close();
+    }
+    
+    /**
+     * Authenticates the user credentials
+     * @param username User's username
+     * @param password User's password
+     * @return true if credentials are valid, false otherwise
+     */
+    private boolean authenticateUser(String username, String password) {
+        // Simple validation against hardcoded credentials
+        // In a real application, check against a database with hashed passwords
+        return VALID_USERNAME.equals(username) && VALID_PASSWORD.equals(password);
+    }
+    
+    /**
+     * Displays a welcome page for successful login
+     * @param out PrintWriter object
+     * @param username Logged-in user's username
+     */
+    private void displayWelcomePage(PrintWriter out, String username) {
+        out.println("<!DOCTYPE html>");
+        out.println("<html lang='en'>");
+        out.println("<head>");
+        out.println("<meta charset='UTF-8'>");
+        out.println("<meta name='viewport' content='width=device-width, initial-scale=1.0'>");
+        out.println("<title>Welcome</title>");
+        out.println("<style>");
+        out.println("* { margin: 0; padding: 0; box-sizing: border-box; }");
+        out.println("body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;");
+        out.println("background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);");
+        out.println("min-height: 100vh; display: flex; justify-content: center; align-items: center; }");
+        out.println(".welcome-container { background: white; padding: 50px; border-radius: 10px;");
+        out.println("box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); text-align: center; max-width: 500px; }");
+        out.println(".success-icon { font-size: 60px; color: #4CAF50; margin-bottom: 20px; }");
+        out.println("h1 { color: #333; margin-bottom: 15px; font-size: 32px; }");
+        out.println(".username { color: #667eea; font-weight: bold; }");
+        out.println("p { color: #666; font-size: 16px; margin-bottom: 30px; }");
+        out.println(".btn { display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);");
+        out.println("color: white; text-decoration: none; border-radius: 5px; font-weight: 600; transition: transform 0.2s; }");
+        out.println(".btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }");
+        out.println(".info { margin-top: 30px; padding: 15px; background: #f0f7ff;");
+        out.println("border-left: 4px solid #667eea; border-radius: 5px; text-align: left; }");
+        out.println(".info p { font-size: 14px; margin: 8px 0; }");
+        out.println("</style>");
+        out.println("</head>");
+        out.println("<body>");
+        out.println("<div class='welcome-container'>");
+        out.println("<div class='success-icon'>✓</div>");
+        out.println("<h1>Welcome, <span class='username'>" + sanitize(username) + "</span>!</h1>");
+        out.println("<p>You have successfully logged into the system.</p>");
+        out.println("<a href='login.html' class='btn'>Logout</a>");
+        
+        out.println("<div class='info'>");
+        out.println("<p><strong>Login Information:</strong></p>");
+        out.println("<p>Username: " + sanitize(username) + "</p>");
+        out.println("<p>Login Time: " + new java.util.Date() + "</p>");
+        out.println("<p>Session ID: " + request.getSession().getId() + "</p>");
+        out.println("</div>");
+        
+        out.println("</div>");
+        out.println("</body>");
+        out.println("</html>");
+    }
+    
+    /**
+     * Displays an error page for failed login
+     * @param out PrintWriter object
+     * @param errorMessage Error message to display
+     */
+    private void displayErrorPage(PrintWriter out, String errorMessage) {
+        out.println("<!DOCTYPE html>");
+        out.println("<html lang='en'>");
+        out.println("<head>");
+        out.println("<meta charset='UTF-8'>");
+        out.println("<meta name='viewport' content='width=device-width, initial-scale=1.0'>");
+        out.println("<title>Login Failed</title>");
+        out.println("<style>");
+        out.println("* { margin: 0; padding: 0; box-sizing: border-box; }");
+        out.println("body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;");
+        out.println("background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);");
+        out.println("min-height: 100vh; display: flex; justify-content: center; align-items: center; }");
+        out.println(".error-container { background: white; padding: 50px; border-radius: 10px;");
+        out.println("box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); text-align: center; max-width: 500px; }");
+        out.println(".error-icon { font-size: 60px; color: #f44336; margin-bottom: 20px; }");
+        out.println("h1 { color: #333; margin-bottom: 15px; font-size: 28px; }");
+        out.println("p { color: #666; font-size: 16px; margin-bottom: 30px; }");
+        out.println(".error-msg { color: #f44336; font-weight: bold; background: #ffebee;");
+        out.println("padding: 15px; border-radius: 5px; margin-bottom: 30px; }");
+        out.println(".btn { display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);");
+        out.println("color: white; text-decoration: none; border-radius: 5px; font-weight: 600; transition: transform 0.2s; }");
+        out.println(".btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }");
+        out.println("</style>");
+        out.println("</head>");
+        out.println("<body>");
+        out.println("<div class='error-container'>");
+        out.println("<div class='error-icon'>✗</div>");
+        out.println("<h1>Login Failed</h1>");
+        out.println("<div class='error-msg'>" + sanitize(errorMessage) + "</div>");
+        out.println("<p>Please check your credentials and try again.</p>");
+        out.println("<a href='login.html' class='btn'>Back to Login</a>");
+        out.println("</div>");
+        out.println("</body>");
+        out.println("</html>");
+    }
+    
+    /**
+     * Sanitizes user input to prevent XSS attacks
+     * @param input User input string
+     * @return Sanitized string
+     */
+    private String sanitize(String input) {
+        if (input == null) return "";
+        return input.replace("<", "&lt;")
+                   .replace(">", "&gt;")
+                   .replace("\"", "&quot;")
+                   .replace("'", "&#x27;")
+                   .replace("&", "&amp;");
+    }
+}
